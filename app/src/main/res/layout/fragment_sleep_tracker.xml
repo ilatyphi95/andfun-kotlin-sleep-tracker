@@ -25,6 +25,9 @@
     <data>
 
         <!-- TODO (03) Create a <variable> that references the ViewModel class. -->
+        <variable
+            name="sleepViewModel"
+            type="com.example.android.trackmysleepquality.sleeptracker.SleepTrackerViewModel" />
     </data>
 
     <!-- Start of the visible fragment layout using ConstraintLayout -->
