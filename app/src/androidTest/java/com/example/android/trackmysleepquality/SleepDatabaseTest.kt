@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.example.android.trackmysleepquality
-
-// TODO (07) Uncomment the code in this file, then run the tests.
-
-// TODO (08) Optional: Add tests to exercise the other DAO methods.
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
