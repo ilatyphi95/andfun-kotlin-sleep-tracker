@@ -52,7 +52,6 @@
                  which keeps it displayed and updated in the TextView
                  whenever it changes. -->
 
-            <!-- TODO (13) Display nightsString in the  text view. -->
             <TextView
                 android:id="@+id/textview"
                 android:layout_width="match_parent"
@@ -67,7 +66,6 @@
              from the ViewModel. The click handler is in the ViewModel as well, and
              you can set it for the Views using this lambda pattern. -->
 
-        <!-- TODO (10) Add the click handlers to the buttons. -->
         <Button
             android:id="@+id/start_button"
             style="@style/SleepButtons"
@@ -103,7 +101,7 @@
             android:layout_marginEnd="@dimen/margin"
             android:layout_marginBottom="@dimen/margin"
             android:text="@string/clear"
-            android:onClick="@{()-> sleepTrackerViewModel.onClearButton()}"
+            android:onClick="@{() -> sleepTrackerViewModel.onClear()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
