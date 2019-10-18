@@ -50,10 +50,7 @@ class SleepTrackerViewModel(
      */
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    private var _tonight = MutableLiveData<SleepNight>()
-
-    val tonight : LiveData<SleepNight>
-            get() = _tonight
+    private var tonight = MutableLiveData<SleepNight?>()
 
     private val nights = database.getAllNights()
 
@@ -64,11 +61,38 @@ class SleepTrackerViewModel(
         formatNights(nights, application.resources)
     }
 
-    //TODO (01) create encapsulated LiveData navigateToSleepQuality and doneNavigating() function.
-    //Use them in onStopTracking() to trigger navigation.
-    private var _navigateToSleepQuality = MutableLiveData<Boolean>()
-    val navigateToSleepQuality : LiveData<Boolean>
+    //TODO (02)  Create three corresponding state variables. Assign them a Transformations
+    //that tests it against the value of tonight.
+
+    //TODO (03) Verify app build and runs without errors.
+
+    //TODO (04) Using the familiar pattern, create encapsulated showSnackBarEvent variable
+    //and doneShowingSnackbar() fuction.
+
+    //TODO (06) In onClear(), set the value of _showOnSnackbarEvent to true.
+
+    /**
+     * Variable that tells the Fragment to navigate to a specific [SleepQualityFragment]
+     *
+     * This is private because we don't want to expose setting this value to the Fragment.
+     */
+    private val _navigateToSleepQuality = MutableLiveData<SleepNight>()
+
+    /**
+     * If this is non-null, immediately navigate to [SleepQualityFragment] and call [doneNavigating]
+     */
+    val navigateToSleepQuality: LiveData<SleepNight>
         get() = _navigateToSleepQuality
+
+    /**
+     * Call this immediately after navigating to [SleepQualityFragment]
+     *
+     * It will clear the navigation request, so if the user rotates their phone it won't navigate
+     * twice.
+     */
+    fun doneNavigating() {
+        _navigateToSleepQuality.value = null
+    }
 
     init {
         initializeTonight()
@@ -76,7 +100,7 @@ class SleepTrackerViewModel(
 
     private fun initializeTonight() {
         uiScope.launch {
-            _tonight.value = getTonightFromDatabase()
+            tonight.value = getTonightFromDatabase()
         }
     }
 
@@ -126,7 +150,7 @@ class SleepTrackerViewModel(
 
             insert(newNight)
 
-            _tonight.value = getTonightFromDatabase()
+            tonight.value = getTonightFromDatabase()
         }
     }
 
@@ -139,13 +163,15 @@ class SleepTrackerViewModel(
             // several nested ones this statement returns from.
             // In this case, we are specifying to return from launch(),
             // not the lambda.
-            val oldNight = _tonight.value ?: return@launch
+            val oldNight = tonight.value ?: return@launch
 
             // Update the night in the database to add the end time.
             oldNight.endTimeMilli = System.currentTimeMillis()
 
             update(oldNight)
-            _navigateToSleepQuality.value = true
+
+            // Set state to navigate to the SleepQualityFragment.
+            _navigateToSleepQuality.value = oldNight
         }
     }
 
@@ -158,7 +184,7 @@ class SleepTrackerViewModel(
             clear()
 
             // And clear tonight since it's no longer in the database
-            _tonight.value = null
+            tonight.value = null
         }
     }
 
@@ -172,9 +198,4 @@ class SleepTrackerViewModel(
         super.onCleared()
         viewModelJob.cancel()
     }
-
-    fun doneNavigating() {
-        _navigateToSleepQuality.value = false
-    }
 }
-
