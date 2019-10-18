@@ -16,7 +16,68 @@
 
 package com.example.android.trackmysleepquality.sleepquality
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.example.android.trackmysleepquality.database.SleepDatabaseDao
+import com.example.android.trackmysleepquality.database.SleepNight
+import kotlinx.coroutines.*
+
 //TODO (03) Using the code in SleepTrackerViewModel for reference, create SleepQualityViewModel
 //with coroutine setup and navigation setup.
+class SleepQualityViewModel(val database: SleepDatabaseDao,
+                            val sleepId : Long, application : Application) : AndroidViewModel(application) {
+    private val viewModelJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+    private val night = MutableLiveData<SleepNight>()
 
-//TODO (04) implement the onSetSleepQuality() click handler using coroutines.
+    private val _onSetSleepQuality = MutableLiveData<Boolean>()
+    val onSetSleepQuality : LiveData<Boolean>
+            get() = _onSetSleepQuality
+    init {
+        getSleepNight();
+    }
+
+    private fun getSleepNight() {
+        uiScope.launch {
+            night.value = getThisNight()
+        }
+    }
+
+    private suspend fun getThisNight() : SleepNight {
+        return withContext(Dispatchers.IO) {
+            var currentNight : SleepNight = SleepNight()
+            currentNight = database.get(sleepId)?: SleepNight()
+            currentNight
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        uiScope.cancel()
+    }
+
+    //TODO (04) implement the onSetSleepQuality() click handler using coroutines.
+    fun setSleepQuality(value: Int) {
+        night.value?.sleepQuality = value
+        uiScope.launch {
+            insert()
+        }
+        _onSetSleepQuality.value = true
+    }
+
+    private suspend fun insert() {
+        withContext(Dispatchers.IO) {
+            if(night.value != null) {
+                database.update(night.value!!)
+            }
+        }
+    }
+
+    fun doneNavigating() {
+        _onSetSleepQuality.value = false
+    }
+
+}
+

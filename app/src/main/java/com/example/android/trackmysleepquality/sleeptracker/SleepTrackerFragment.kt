@@ -22,10 +22,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.database.SleepDatabase
 import com.example.android.trackmysleepquality.databinding.FragmentSleepTrackerBinding
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * A fragment with buttons to record start and end times for sleep, which are saved in
@@ -61,6 +67,14 @@ class SleepTrackerFragment : Fragment() {
         binding.setLifecycleOwner(this)
 
         //TODO (02) Add an observer for navigateToSleepQuality.
+        sleepTrackerViewModel.navigateToSleepQuality.observe(this, Observer { navigate ->
+            if(navigate) {
+                val nightId = sleepTrackerViewModel.tonight.value!!.nightId
+                val action = SleepTrackerFragmentDirections.actionSleepTrackerFragmentToSleepQualityFragment(nightId)
+                findNavController().navigate(action)
+                sleepTrackerViewModel.doneNavigating()
+            }
+        })
 
         return binding.root
     }
